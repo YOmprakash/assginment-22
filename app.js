@@ -58,7 +58,7 @@ const validatePassword = (password) => {
 };
 //API-1
 
-app.post("/register/", authenticateJwtToken, async (request, response) => {
+app.post("/register/", async (request, response) => {
   const { username, password, name, gender } = request.body;
 
   const getUserQuery = `SELECT * FROM user WHERE username = '${username}';`;
@@ -73,29 +73,29 @@ app.post("/register/", authenticateJwtToken, async (request, response) => {
             '${name}',
            '${gender}');`;
 
-      const response = await db.run(createNewUserQuery);
-      response.status = 200;
+      await db.run(createNewUserQuery);
+
       response.send("User created successfully");
     } else {
-      response.status = 400;
+      response.status(400);
       response.send("Password is too short");
     }
   } else {
-    response.status = 400;
+    response.status(400);
     response.send("User already exists");
   }
 });
 
 //API-2
 
-app.post("/login/", authenticateJwtToken, async (request, response) => {
+app.post("/login/", async (request, response) => {
   const { username, password } = request.body;
 
   const getUserQuery = `SELECT * FROM user WHERE username = '${username}';`;
   const dbUser = await db.get(getUserQuery);
 
   if (dbUser === undefined) {
-    response.status = 400;
+    response.status(400);
     response.send("Invalid user");
   } else {
     const isPasswordMatch = await bcrypt.compare(password, dbUser.password);
@@ -232,7 +232,7 @@ app.get("/user/tweets/", authenticateJwtToken, async (request, respond) => {
 
 //API-10
 
-app.post("/user/tweets/", async (request, respond) => {
+app.post("/user/tweets/", authenticateJwtToken, async (request, respond) => {
   const { userId } = request;
   const { tweet } = request.body;
   const tweetQuery = `INSERT INTO tweet(tweet)
@@ -252,7 +252,7 @@ app.delete(
   async (request, response) => {
     const { tweetId } = request.params;
 
-    const deleteTweetQuery = `DELETE * FROM tweet WHERE tweet_id = ${tweetId};`;
+    const deleteTweetQuery = `DELETE * FROM tweet WHERE tweet_id = '${tweetId}';`;
     await db.run(deleteTweetQuery);
 
     response.send("Tweet Removed");
