@@ -116,7 +116,13 @@ app.get(
   "/user/tweets/feed/",
   authenticateJwtToken,
   async (request, response) => {
-    const { userId } = request;
+    
+      const { username } = request;
+
+    let userId = SELECT user_id from user where username = '${username}';
+
+    userId = await db.get(userId);
+
 
     const getUserTweetsQuery = `SELECT user.username,tweet.tweet,tweet.date_time as dateTime
     FROM tweet 
@@ -124,7 +130,7 @@ app.get(
     WHERE tweet.user_id IN (
         SELECT following_user_id 
         FROM follower
-        WHERE follower_user_id = ${userId}
+        WHERE follower_user_id = '${userId}'
     )
     ORDER BY dateTime DESC
     LIMIT 4;`;
@@ -136,6 +142,12 @@ app.get(
 //API-4
 
 app.get("/user/following/", authenticateJwtToken, async (request, response) => {
+      const { username } = request;
+
+    let userId = SELECT user_id from user where username = '${username}';
+
+    userId = await db.get(userId);
+
   const getUserQuery = `SELECT user.name 
   FROM user 
   INNER JOIN follower ON user.user_id = follower.following_user_id
@@ -184,6 +196,12 @@ app.get(
   authenticateJwtToken,
   async (request, response) => {
     const { tweetId } = request.params;
+      const { username } = request;
+
+    let userId = SELECT user_id from user where username = '${username}';
+
+    userId = await db.get(userId);
+
     const getTweetsQuery = `
       SELECT
        count(*) AS likes
@@ -217,7 +235,12 @@ app.get(
 //API-9
 
 app.get("/user/tweets/", authenticateJwtToken, async (request, respond) => {
-  const { userId } = request;
+   const { username } = request;
+
+    let userId = SELECT user_id from user where username = '${username}';
+
+    userId = await db.get(userId);
+
 
   const getUserTweets = `
     SELECT tweet.tweet,
@@ -233,7 +256,12 @@ app.get("/user/tweets/", authenticateJwtToken, async (request, respond) => {
 //API-10
 
 app.post("/user/tweets/", authenticateJwtToken, async (request, respond) => {
-  const { userId } = request;
+  const { username } = request;
+
+    let userId = SELECT user_id from user where username = '${username}';
+
+    userId = await db.get(userId);
+
   const { tweet } = request.body;
   const tweetQuery = `INSERT INTO tweet(tweet)
     VALUES('${tweet}')
